@@ -1,16 +1,16 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
-from .forms import CustomUserChangeForm, LoginForm
+from .forms import CustomUserCreationForm, LoginForm
 
 
 def user_signup(request):
     if request.method == 'POST':
-        form = CustomUserChangeForm(request.POST)
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             form.save()
             return redirect('login')
     else:
-        form = CustomUserChangeForm()
+        form = CustomUserCreationForm()
     return render(request, 'users/signup.html', {'form': form})
 
 
