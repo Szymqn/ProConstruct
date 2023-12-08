@@ -1,0 +1,27 @@
+{% load static %}
+{% block content %}
+<div class="container">
+    <div class="cart-header">
+        <h1>Your Cart</h1>
+    </div>
+    <ul>
+        {% for item in cart_items %}
+        <li class="cart-item">
+            <div class="cart-item-details">
+                <div class="cart-item-name">{{ item.product.name }}</div>
+                <form action="{% url 'remove-from-cart' item.product.id %}" method="post">
+                    {% csrf_token %}
+                    <button class="remove-from-cart-btn" type="submit">Remove</button>
+                </form>
+            </div>
+            <div class="cart-item-price" data-price="{{ item.product.price }}">
+                ${{ item.product.price }}
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    <a class="continue-shopping-link" href="{% url 'product-list' %}">Continue Shopping</a>
+
+    <a class="checkout-button" href="#">Checkout</a>
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% block content %}
+<h1>Product List</h1>
+{% for product in products %}
+<div class="product-card">
+    <div class="product-image">
+        <img src="{{ product.image }}" alt="{{ product.name }}">
+    </div>
+    <div class="product-name">{{ product.name }}</div>
+    <div class="product-description">{{ product.description }}</div>
+    <div class="product-price">$ {{ product.price }}</div>
+    <form action="{% url 'add-to-cart' product.id %}" method="post">
+        {% csrf_token %}
+        <button class="add-to-cart-btn">Add to Cart</button>
+    </form>
+</div>
+{% endfor %}
+{% endblock %}
