@@ -14,6 +14,17 @@
                     <button class="remove-from-cart-btn" type="submit">Remove</button>
                 </form>
             </div>
+            <div class="cart-item-quantity">
+                <form action="{% url 'increase-cart-item' item.product.id %}" method="post">
+                    {% csrf_token %}
+                    <button class="quantity-btn increase-quantity" type="submit">+</button>
+                </form>
+                <span class="item-quantity">{{ item.quantity }}</span>
+                <form action="{% url 'decrease-cart-item' item.product.id %}" method="post">
+                    {% csrf_token %}
+                    <button class="quantity-btn decrease-quantity" type="submit">-</button>
+                </form>
+            </div>
             <div class="cart-item-price" data-price="{{ item.product.price }}">
                 ${{ item.product.price }}
             </div>
@@ -24,4 +35,5 @@
 
     <a class="checkout-button" href="#">Checkout</a>
 </div>
+<script src="{% static 'js/cart.js' %}"></script>
 {% endblock %}
