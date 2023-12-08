@@ -1,5 +1,6 @@
 {% block content %}
 <h1>Product List</h1>
+<a href="{% url 'cart' %}">Cart</a>
 {% for product in products %}
 <div class="product-card">
     <div class="product-image">
@@ -14,4 +15,5 @@
     </form>
 </div>
 {% endfor %}
+<a href="{% url 'home' %}">Home</a>
 {% endblock %}

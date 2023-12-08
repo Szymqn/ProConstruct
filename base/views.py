@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from .models import Product, Cart, CartItem
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.db.models import Sum, F
 
 
 def index(request):
@@ -44,7 +45,9 @@ def remove_from_cart(request, product_id):
 def view_cart(request):
     cart = request.user.cart
     cart_items = CartItem.objects.filter(cart=cart)
-    return render(request, 'base/cart.html', {'cart_items': cart_items})
+    total_amount = cart_items.aggregate(total=Sum(F('product__price') * F('quantity')))['total'] or 0
+    
+    return render(request, 'base/cart.html', {'cart_items': cart_items, 'total_amount': total_amount})
 
 
 @login_required(login_url='login')
