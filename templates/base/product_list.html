@@ -8,6 +8,7 @@
     </div>
     <div class="product-name">{{ product.name }}</div>
     <div class="product-description">{{ product.description }}</div>
+    <div class="product-quantity">{{ product.quantity }}</div>
     <div class="product-price">$ {{ product.price }}</div>
     <form action="{% url 'add-product-to-cart' product.id %}" method="post">
         {% csrf_token %}

@@ -6,77 +6,69 @@
     </div>
     <ul>
         {% for item in cart_items %}
-        <li class="cart-item">
-            <div class="cart-item-details">
-{#                <div class="cart-item-name">{{ item.product.name }}</div>#}
-{#                <form action="{% url 'remove-product-from-cart' item.product.id %}" method="post">#}
-{#                    {% csrf_token %}#}
-{#                    <button class="remove-from-cart-btn" type="submit">Remove</button>#}
-{#                </form>#}
-            </div>
-{#            <div class="cart-item-details">#}
-{#                <div class="cart-item-name">{{ item.equipment.name }}</div>#}
-{#                <form action="{% url 'remove-equipment-from-cart' item.equipment.id %}" method="post">#}
-{#                    {% csrf_token %}#}
-{#                    <button class="remove-from-cart-btn" type="submit">Remove</button>#}
-{#                </form>#}
-{#            </div>#}
-            <div class="cart-item-quantity">
-{#                <form action="{% url 'increase-cart-item' item.product.id %}" method="post">#}
-{#                    {% csrf_token %}#}
-{#                    <button class="quantity-btn increase-quantity" type="submit">+</button>#}
-{#                </form>#}
-{#                <span class="item-quantity">{{ item.quantity }}</span>#}
-{#                <form action="{% url 'decrease-cart-item' item.product.id %}" method="post">#}
-{#                    {% csrf_token %}#}
-{#                    <button class="quantity-btn decrease-quantity" type="submit">-</button>#}
-{#                </form>#}
-            </div>
-            <div class="cart-item-quantity">
-{#                <form action="{% url 'increase-cart-item' item.equipment.id %}" method="post">#}
-{#                    {% csrf_token %}#}
-{#                    <button class="quantity-btn increase-quantity" type="submit">+</button>#}
-{#                </form>#}
-{#                <span class="item-quantity">{{ item.quantity }}</span>#}
-{#                <form action="{% url 'decrease-cart-item' item.equipment.id %}" method="post">#}
-{#                    {% csrf_token %}#}
-{#                    <button class="quantity-btn decrease-quantity" type="submit">-</button>#}
-{#                </form>#}
-            </div>
-{#            <div class="cart-item-price" data-price="{{ item.product.price }}">#}
-{#                ${{ item.product.price }}<br>#}
-{#                {{ item.product_quality }}#}
-{#            </div>#}
-{#            <div class="cart-item-price" data-price="{{ item.equipment.price }}">#}
-{#                ${{ item.equipment.price }}<br>#}
-{#                {{ item.equipment_quality }}#}
-{#            </div>#}
-            <div class="cart-item-price" data-price="{{ item.product.price }}">
-                {% if item.product.price %}
-                    ${{ item.product.price }}<br>
-                    {{ item.product_quality }}
-                {% endif %}
-            </div>
-
-            <div class="cart-item-price" data-price="{{ item.equipment.price }}">
-                {% if item.equipment.price %}
-                    ${{ item.equipment.price }}<br>
-                    {{ item.equipment_quality }}
-                {% endif %}
-            </div>
-
+            <li class="cart-item">
+            {% if item.product %}
+                <div class="cart-item-name">{{ item.product.name }}</div>
+                ${{ item.product.price }}<br>
+                <div class="item-quantity">
+                    <button class="quantity-btn" onclick="updateQuantity('{{ item.id }}', 'decrement', 'product')">-</button>
+                    <span id="product-quantity-{{ item.id }}">{{ item.product_quantity }}</span>
+                    <button class="quantity-btn" onclick="updateQuantity('{{ item.id }}', 'increment', 'product')">+</button>
+                </div>
+                <form action="{% if item.product.id %}{% url 'remove-product-from-cart' item.product.id %}{% endif %}" method="post">
+                    {% csrf_token %}
+                    <button class="remove-from-cart-btn" type="submit">Remove</button>
+                </form>
+            {% elif item.equipment %}
+                <div class="cart-item-name">{{ item.equipment.name }}</div>
+                ${{ item.equipment.price }}<br>
+                <div class="item-quantity">
+                    <button class="quantity-btn" onclick="updateQuantity('{{ item.id }}', 'decrement', 'equipment')">-</button>
+                    <span id="equipment-quantity-{{ item.id }}">{{ item.equipment_quantity }}</span>
+                    <button class="quantity-btn" onclick="updateQuantity('{{ item.id }}', 'increment', 'equipment')">+</button>
+                </div>
+                <form action="{% if item.equipment.id %}{% url 'remove-equipment-from-cart' item.equipment.id %}{% endif %}" method="post">
+                    {% csrf_token %}
+                    <button class="remove-from-cart-btn" type="submit">Remove</button>
+                </form>
+            {% endif %}
         </li>
         {% endfor %}
     </ul>
 
     <div class="cart-total">
-        <p>Total: ${{ total_amount }}</p>
+        <p>Total: $<span id="total-amount">{{ total_amount }}</span></p>
     </div>
     Continue Shopping
     <a class="continue-shopping-link" href="{% url 'product-list' %}">Products</a>
     <a class="continue-shopping-link" href="{% url 'equipment-list' %}">Equipments</a>
+    <a class="home" href="{% url 'home' %}">Home</a>
 
     <a class="checkout-button" href="#">Checkout</a>
 </div>
-<script src="{% static 'js/cart.js' %}"></script>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+<script>
+function updateQuantity(cartItemId, action, itemType) {
+    $.ajax({
+        url: `/update-quantity/${cartItemId}/${action}/${itemType}/`,
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                $(`#${itemType}-quantity-${cartItemId}`).text(response.quantity);
+                $('#total-amount').text(response.totalAmount);
+            } else {
+                console.error('Error updating quantity:', response.error);
+            }
+        },
+        error: function(error) {
+            console.error('AJAX error:', error);
+        }
+    });
+}
+</script>
 {% endblock %}
