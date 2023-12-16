@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect
 from .models import Product, Equipment, Cart, CartItem
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
 from django.db.models import Sum, F
+from django.http import JsonResponse
 
 
 def index(request):
@@ -26,7 +26,7 @@ def add_product_to_cart(request, product_id):
     cart_item, item_created = CartItem.objects.get_or_create(cart=cart, product=product)
 
     if not item_created:
-        cart_item.product_quality += 1
+        cart_item.product_quantity += 1
         cart_item.save()
 
     return redirect('product-list')
@@ -39,7 +39,7 @@ def add_equipment_to_cart(request, equipment_id):
     cart_item, item_created = CartItem.objects.get_or_create(cart=cart, equipment=equipment)
 
     if not item_created:
-        cart_item.equipment_quality += 1
+        cart_item.equipment_quantity += 1
         cart_item.save()
 
     return redirect('equipment-list')
@@ -51,7 +51,7 @@ def remove_product_from_cart(request, product_id):
     cart = Cart.objects.get(user=request.user)
     try:
         cart_item = cart.cartitem_set.get(product=product)
-        if cart_item.product_quality >= 1:
+        if cart_item.product_quantity >= 1:
             cart_item.delete()
     except CartItem.DoesNotExist:
         pass
@@ -65,7 +65,7 @@ def remove_equipment_from_cart(request, equipment_id):
     cart = Cart.objects.get(user=request.user)
     try:
         cart_item = cart.cartitem_set.get(equipment=equipment)
-        if cart_item.equipment_quality >= 1:
+        if cart_item.equipment_quantity >= 1:
             cart_item.delete()
     except CartItem.DoesNotExist:
         pass
@@ -74,81 +74,51 @@ def remove_equipment_from_cart(request, equipment_id):
 
 
 @login_required()
+def update_quantity(request, cart_item_id, action, item_type):
+    try:
+        cart_item = CartItem.objects.get(pk=cart_item_id)
+
+        if item_type == 'product':
+            quantity_attr = 'product_quantity'
+        elif item_type == 'equipment':
+            quantity_attr = 'equipment_quantity'
+        else:
+            return JsonResponse({'error': 'Invalid item type'})
+
+        if action == 'increment':
+            setattr(cart_item, quantity_attr, getattr(cart_item, quantity_attr) + 1)
+        elif action == 'decrement' and getattr(cart_item, quantity_attr) > 1:
+            setattr(cart_item, quantity_attr, getattr(cart_item, quantity_attr) - 1)
+        else:
+            return JsonResponse({'error': 'Invalid action'})
+
+        cart_item.save()
+
+        product_total = CartItem.objects.filter(product__isnull=False).aggregate(
+            total=Sum(F('product__price') * F('product_quantity')))['total'] or 0
+
+        equipment_total = CartItem.objects.filter(equipment__isnull=False).aggregate(
+            total=Sum(F('equipment__price') * F('equipment_quantity')))['total'] or 0
+
+        total_amount = round(product_total + equipment_total, 2)
+
+        return JsonResponse({'success': True, 'quantity': getattr(cart_item, quantity_attr), 'totalAmount': total_amount})
+
+    except CartItem.DoesNotExist:
+        return JsonResponse({'error': 'Cart item not found'})
+
+
+@login_required()
 def view_cart(request):
     cart = request.user.cart
     cart_items = CartItem.objects.filter(cart=cart)
-    total_amount = cart_items.aggregate(total=Sum(F('product__price') * F('product_quality')) + Sum(F('equipment__price') * F('equipment_quality')))['total'] or 0
+
+    product_total = cart_items.filter(product__isnull=False).aggregate(
+        total=Sum(F('product__price') * F('product_quantity')))['total'] or 0
+
+    equipment_total = cart_items.filter(equipment__isnull=False).aggregate(
+        total=Sum(F('equipment__price') * F('equipment_quantity')))['total'] or 0
+
+    total_amount = round(product_total + equipment_total, 2)
 
     return render(request, 'base/cart.html', {'cart_items': cart_items, 'total_amount': total_amount})
-
-
-@login_required(login_url='login')
-def increase_cart_product(request, product_id):
-    product = Product.objects.get(pk=product_id)
-    cart = request.user.cart
-    cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
-
-    cart_item.product_quality += 1
-    cart_item.save()
-
-    return redirect('cart')
-
-
-@login_required(login_url='login')
-def increase_cart_equipment(request, equipment_id):
-    equipment = Equipment.objects.get(pk=equipment_id)
-    cart = request.user.cart
-    cart_item, created = CartItem.objects.get_or_create(cart=cart, equipment=equipment)
-
-    cart_item.equipment_quality += 1
-    cart_item.save()
-
-    return redirect('cart')
-
-
-@login_required(login_url='login')
-def decrease_cart_product(request, product_id):
-    product = Product.objects.get(pk=product_id)
-    cart = request.user.cart
-    cart_item = cart.cartitem_set.get(product=product)
-
-    if cart_item.product_quality > 1:
-        cart_item.product_quality -= 1
-        cart_item.save()
-    else:
-        cart_item.delete()
-
-    return redirect('cart')
-
-
-@login_required(login_url='login')
-def decrease_cart_equipment(request, equipment_id):
-    equipment = Equipment.objects.get(pk=equipment_id)
-    cart = request.user.cart
-    cart_item = cart.cartitem_set.get(equipment=equipment)
-
-    if cart_item.equipment_quality > 1:
-        cart_item.equipment_quality -= 1
-        cart_item.save()
-    else:
-        cart_item.delete()
-
-    return redirect('cart')
-
-
-@login_required(login_url='login')
-def fetch_cart_count(request):
-    cart_count = 0
-    if request.user.is_authenticated:
-        cart = request.user.cart
-        cart_count = CartItem.objects.filter(cart=cart).count()
-    return JsonResponse({'cart_count': cart_count})
-
-
-def get_cart_count(request):
-    if request.user.is_authenticated:
-        cart_items = CartItem.objects.filter(cart=request.user.cart)
-        cart_count = cart_items.count()
-    else:
-        cart_count = 0
-    return cart_count
