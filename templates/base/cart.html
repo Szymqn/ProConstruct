@@ -24,7 +24,7 @@
                 ${{ item.equipment.price }}<br>
                 <div class="item-quantity">
                     <button class="quantity-btn" onclick="updateQuantity('{{ item.id }}', 'decrement', 'equipment')">-</button>
-                    <span id="product-quantity-{{ item.id }}">{{ item.product_quantity }}</span>
+                    <span id="equipment-quantity-{{ item.id }}">{{ item.equipment_quantity }}</span>
                     <button class="quantity-btn" onclick="updateQuantity('{{ item.id }}', 'increment', 'equipment')">+</button>
                 </div>
                 <form action="{% if item.equipment.id %}{% url 'remove-equipment-from-cart' item.equipment.id %}{% endif %}" method="post">
@@ -37,7 +37,7 @@
     </ul>
 
     <div class="cart-total">
-        <p>Total: ${{ total_amount }}</p>
+        <p>Total: $<span id="total-amount">{{ total_amount }}</span></p>
     </div>
     Continue Shopping
     <a class="continue-shopping-link" href="{% url 'product-list' %}">Products</a>
@@ -58,8 +58,8 @@ function updateQuantity(cartItemId, action, itemType) {
         dataType: 'json',
         success: function(response) {
             if (response.success) {
-                // Update the displayed quantity on success
                 $(`#${itemType}-quantity-${cartItemId}`).text(response.quantity);
+                $('#total-amount').text(response.totalAmount);
             } else {
                 console.error('Error updating quantity:', response.error);
             }

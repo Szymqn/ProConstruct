@@ -94,7 +94,15 @@ def update_quantity(request, cart_item_id, action, item_type):
 
         cart_item.save()
 
-        return JsonResponse({'success': True, 'quantity': getattr(cart_item, quantity_attr)})
+        product_total = CartItem.objects.filter(product__isnull=False).aggregate(
+            total=Sum(F('product__price') * F('product_quantity')))['total'] or 0
+
+        equipment_total = CartItem.objects.filter(equipment__isnull=False).aggregate(
+            total=Sum(F('equipment__price') * F('equipment_quantity')))['total'] or 0
+
+        total_amount = round(product_total + equipment_total, 2)
+
+        return JsonResponse({'success': True, 'quantity': getattr(cart_item, quantity_attr), 'totalAmount': total_amount})
 
     except CartItem.DoesNotExist:
         return JsonResponse({'error': 'Cart item not found'})
@@ -104,7 +112,13 @@ def update_quantity(request, cart_item_id, action, item_type):
 def view_cart(request):
     cart = request.user.cart
     cart_items = CartItem.objects.filter(cart=cart)
-    total_amount = round(cart_items.aggregate(
-        total=Sum(F('product__price') * F('product_quantity')) + Sum(F('equipment__price') * F('equipment_quantity')))['total'] or 0, 2)
+
+    product_total = cart_items.filter(product__isnull=False).aggregate(
+        total=Sum(F('product__price') * F('product_quantity')))['total'] or 0
+
+    equipment_total = cart_items.filter(equipment__isnull=False).aggregate(
+        total=Sum(F('equipment__price') * F('equipment_quantity')))['total'] or 0
+
+    total_amount = round(product_total + equipment_total, 2)
 
     return render(request, 'base/cart.html', {'cart_items': cart_items, 'total_amount': total_amount})
