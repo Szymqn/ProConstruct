@@ -7,64 +7,44 @@
     <ul>
         {% for item in cart_items %}
         <li class="cart-item">
+            {% if item.product %}
             <div class="cart-item-details">
-{#                <div class="cart-item-name">{{ item.product.name }}</div>#}
-{#                <form action="{% url 'remove-product-from-cart' item.product.id %}" method="post">#}
-{#                    {% csrf_token %}#}
-{#                    <button class="remove-from-cart-btn" type="submit">Remove</button>#}
-{#                </form>#}
+                <div class="cart-item-name">{{ item.product.name }}</div>
+                ${{ item.product.price }}<br>
+                {{ item.product_quality }}
+                <div class="item-quantity">{{ item.product_quantity }}</div>
+                <form action="{% if item.product.id %}{% url 'increase-product-cart-item' item.product.id %}{% endif %}" method="post">
+                    {% csrf_token %}
+                    <button class="quantity-btn increase-quantity" type="submit">+</button>
+                </form>
+                <form action="{% url 'decrease-product-cart-item' item.product.id %}" method="post">
+                    {% csrf_token %}
+                    <button class="quantity-btn decrease-quantity" type="submit">-</button>
+                </form>
+                <form action="{% if item.product.id %}{% url 'remove-product-from-cart' item.product.id %}{% endif %}" method="post">
+                    {% csrf_token %}
+                    <button class="remove-from-cart-btn" type="submit">Remove</button>
+                </form>
             </div>
-{#            <div class="cart-item-details">#}
-{#                <div class="cart-item-name">{{ item.equipment.name }}</div>#}
-{#                <form action="{% url 'remove-equipment-from-cart' item.equipment.id %}" method="post">#}
-{#                    {% csrf_token %}#}
-{#                    <button class="remove-from-cart-btn" type="submit">Remove</button>#}
-{#                </form>#}
-{#            </div>#}
-            <div class="cart-item-quantity">
-{#                <form action="{% url 'increase-cart-item' item.product.id %}" method="post">#}
-{#                    {% csrf_token %}#}
-{#                    <button class="quantity-btn increase-quantity" type="submit">+</button>#}
-{#                </form>#}
-{#                <span class="item-quantity">{{ item.quantity }}</span>#}
-{#                <form action="{% url 'decrease-cart-item' item.product.id %}" method="post">#}
-{#                    {% csrf_token %}#}
-{#                    <button class="quantity-btn decrease-quantity" type="submit">-</button>#}
-{#                </form>#}
-            </div>
-            <div class="cart-item-quantity">
-{#                <form action="{% url 'increase-cart-item' item.equipment.id %}" method="post">#}
-{#                    {% csrf_token %}#}
-{#                    <button class="quantity-btn increase-quantity" type="submit">+</button>#}
-{#                </form>#}
-{#                <span class="item-quantity">{{ item.quantity }}</span>#}
-{#                <form action="{% url 'decrease-cart-item' item.equipment.id %}" method="post">#}
-{#                    {% csrf_token %}#}
-{#                    <button class="quantity-btn decrease-quantity" type="submit">-</button>#}
-{#                </form>#}
-            </div>
-{#            <div class="cart-item-price" data-price="{{ item.product.price }}">#}
-{#                ${{ item.product.price }}<br>#}
-{#                {{ item.product_quality }}#}
-{#            </div>#}
-{#            <div class="cart-item-price" data-price="{{ item.equipment.price }}">#}
-{#                ${{ item.equipment.price }}<br>#}
-{#                {{ item.equipment_quality }}#}
-{#            </div>#}
-            <div class="cart-item-price" data-price="{{ item.product.price }}">
-                {% if item.product.price %}
-                    ${{ item.product.price }}<br>
-                    {{ item.product_quality }}
-                {% endif %}
-            </div>
-
-            <div class="cart-item-price" data-price="{{ item.equipment.price }}">
-                {% if item.equipment.price %}
-                    ${{ item.equipment.price }}<br>
-                    {{ item.equipment_quality }}
-                {% endif %}
-            </div>
-
+            {% elif item.equipment %}
+                <div class="cart-item-name">{{ item.equipment.name }}</div>
+                <div class="cart-item-details">
+                ${{ item.equipment.price }}<br>
+                {{ item.equipment_quality }}
+                <form action="{% url 'increase-equipment-cart-item' item.equipment.id %}" method="post">
+                    {% csrf_token %}
+                    <button class="quantity-btn increase-quantity" type="submit">+</button>
+                </form>
+                <form action="{% url 'decrease-equipment-cart-item' item.equipment.id %}" method="post">
+                    {% csrf_token %}
+                    <button class="quantity-btn decrease-quantity" type="submit">-</button>
+                </form>
+                    <form action="{% if item.equipment.id %}{% url 'remove-equipment-from-cart' item.equipment.id %}{% endif %}" method="post">
+                        {% csrf_token %}
+                        <button class="remove-from-cart-btn" type="submit">Remove</button>
+                    </form>
+                </div>
+            {% endif %}
         </li>
         {% endfor %}
     </ul>

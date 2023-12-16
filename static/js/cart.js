@@ -1,9 +1,7 @@
 const increaseButtons = document.querySelectorAll(".increase-quantity");
 const decreaseButtons = document.querySelectorAll(".decrease-quantity");
-const quantityElements = document.querySelectorAll(".item-quantity");
-const priceElements = document.querySelectorAll(".cart-item-price");
 
-increaseButtons.forEach((button, index) => {
+increaseButtons.forEach((button) => {
     button.addEventListener("click", (event) => {
         event.preventDefault();
         const currentItem = event.target.closest(".cart-item");
@@ -17,7 +15,7 @@ increaseButtons.forEach((button, index) => {
     });
 });
 
-decreaseButtons.forEach((button, index) => {
+decreaseButtons.forEach((button) => {
     button.addEventListener("click", (event) => {
         event.preventDefault();
         const currentItem = event.target.closest(".cart-item");

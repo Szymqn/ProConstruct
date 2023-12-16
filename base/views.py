@@ -77,13 +77,13 @@ def remove_equipment_from_cart(request, equipment_id):
 def view_cart(request):
     cart = request.user.cart
     cart_items = CartItem.objects.filter(cart=cart)
-    total_amount = cart_items.aggregate(total=Sum(F('product__price') * F('product_quality')) + Sum(F('equipment__price') * F('equipment_quality')))['total'] or 0
+    total_amount = round(cart_items.aggregate(total=Sum(F('product__price') * F('product_quality')) + Sum(F('equipment__price') * F('equipment_quality')))['total'] or 0, 2)
 
     return render(request, 'base/cart.html', {'cart_items': cart_items, 'total_amount': total_amount})
 
 
 @login_required(login_url='login')
-def increase_cart_product(request, product_id):
+def increase_product_cart(request, product_id):
     product = Product.objects.get(pk=product_id)
     cart = request.user.cart
     cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
@@ -95,7 +95,7 @@ def increase_cart_product(request, product_id):
 
 
 @login_required(login_url='login')
-def increase_cart_equipment(request, equipment_id):
+def increase_equipment_cart(request, equipment_id):
     equipment = Equipment.objects.get(pk=equipment_id)
     cart = request.user.cart
     cart_item, created = CartItem.objects.get_or_create(cart=cart, equipment=equipment)
@@ -107,7 +107,7 @@ def increase_cart_equipment(request, equipment_id):
 
 
 @login_required(login_url='login')
-def decrease_cart_product(request, product_id):
+def decrease_product_cart(request, product_id):
     product = Product.objects.get(pk=product_id)
     cart = request.user.cart
     cart_item = cart.cartitem_set.get(product=product)
@@ -122,7 +122,7 @@ def decrease_cart_product(request, product_id):
 
 
 @login_required(login_url='login')
-def decrease_cart_equipment(request, equipment_id):
+def decrease_equipment_cart(request, equipment_id):
     equipment = Equipment.objects.get(pk=equipment_id)
     cart = request.user.cart
     cart_item = cart.cartitem_set.get(equipment=equipment)
