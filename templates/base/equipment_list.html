@@ -8,6 +8,7 @@
     </div>
     <div class="equipment-name">{{ equipment.name }}</div>
     <div class="equipment-description">{{ equipment.description }}</div>
+    <div class="equipment-quantity">{{ equipment.quantity }}</div>
     <div class="equipment-price">$ {{ equipment.price }}</div>
     <form action="{% url 'add-equipment-to-cart' equipment.id %}" method="post">
         {% csrf_token %}
