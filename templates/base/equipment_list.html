@@ -1,0 +1,19 @@
+{% block content %}
+<h1>Equipment List</h1>
+<a href="{% url 'cart' %}">Cart</a>
+{% for equipment in equipments %}
+<div class="equipment-card">
+    <div class="equipment-image">
+        <img src="{{ equipment.image }}" alt="{{ equipment.name }}">
+    </div>
+    <div class="equipment-name">{{ equipment.name }}</div>
+    <div class="equipment-description">{{ equipment.description }}</div>
+    <div class="equipment-price">$ {{ equipment.price }}</div>
+    <form action="{% url 'add-equipment-to-cart' equipment.id %}" method="post">
+        {% csrf_token %}
+        <button class="add-to-cart-btn">Add to Cart</button>
+    </form>
+</div>
+{% endfor %}
+<a href="{% url 'home' %}">Home</a>
+{% endblock %}
