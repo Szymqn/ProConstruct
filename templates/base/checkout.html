@@ -1,0 +1,20 @@
+{% block content %}
+    Order summary
+    <p>Order #{{ order.id }} for {{ order.user.username }}</p>
+
+    Products:
+    <ul>
+        {% for name, quantity in order_products %}
+            <li>Item: {{ name }}, Quantity: {{ quantity }}</li>
+        {% endfor %}
+    </ul>
+
+    Equipments:
+    <ul>
+        {% for name, quantity in order_equipments %}
+            <li>Item: {{ name }}, Quantity: {{ quantity }}</li>
+        {% endfor %}
+    </ul>
+
+    <p>Total Amount: {{ total_amount }}</p>
+{% endblock %}

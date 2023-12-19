@@ -73,7 +73,7 @@
                     <td>{{ item.equipment.price }}</td>
                     <td>
                     <button class="btn btn-danger" style="margin-left: 1rem;" onclick="updateQuantity('{{ item.id }}', 'decrement', 'equipment')">-</button>
-                    <span id="product-quantity-{{ item.id }}">{{ item.equipment_quantity }}</span>
+                    <span id="equipment-quantity-{{ item.id }}">{{ item.equipment_quantity }}</span>
                     <button class="btn btn-success" style="margin-right: 1rem;" onclick="updateQuantity('{{ item.id }}', 'increment', 'equipment')">+</button>
                     </td>
                     <td>
@@ -96,7 +96,7 @@
     <a class="continue-shopping-link" href="{% url 'equipment-list' %}">Equipments</a>
     <a class="home" href="{% url 'home' %}">Home</a>
 
-    <a class="checkout-button" href="#">Checkout</a>
+    <a class="checkout-button" href="{% url 'checkout' %}">Checkout</a>
 </div>
 {% endblock %}
 

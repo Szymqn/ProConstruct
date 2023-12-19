@@ -12,4 +12,5 @@ urlpatterns = [
     path('remove-equipmet-from-cart/<int:equipment_id>/', views.remove_equipment_from_cart, name='remove-equipment-from-cart'),
     path('cart/', views.view_cart, name='cart'),
     path('update-quantity/<int:cart_item_id>/<str:action>/<str:item_type>/', views.update_quantity, name='update-quantity'),
+    path('checkout/', views.checkout, name='checkout'),
 ]
