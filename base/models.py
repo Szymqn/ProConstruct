@@ -62,4 +62,4 @@ class OrderEquipment(models.Model):
     cart_item = models.ForeignKey(CartItem, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.cart_item
+        return str(self.cart_item)

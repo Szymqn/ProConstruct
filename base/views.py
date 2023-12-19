@@ -171,12 +171,14 @@ def checkout(request):
 
     order = Order.objects.create(user=request.user)
     order_products = []
+    order_equipments = []
 
     for cart_item in cart_items:
         if cart_item.product:
             order_product = OrderProduct.objects.create(order=order, cart_item=cart_item)
-            order_products.append(order_product)
+            order_products.append([order_product.cart_item.product.name, cart_item.product_quantity])
         elif cart_item.equipment:
-            OrderEquipment.objects.create(order=order, cart_item=cart_item)
+            order_equipment = OrderEquipment.objects.create(order=order, cart_item=cart_item)
+            order_equipments.append([order_equipment.cart_item.equipment.name, cart_item.equipment_quantity])
 
-    return render(request, 'base/checkout.html', {'order': order, 'order_product': order_products, 'total_amount': total_amount})
+    return render(request, 'base/checkout.html', {'order': order, 'order_products': order_products, 'order_equipments': order_equipments, 'total_amount': total_amount})
