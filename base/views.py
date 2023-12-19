@@ -1,5 +1,6 @@
-from django.shortcuts import render, redirect
-from .models import Product, Equipment, Cart, CartItem
+from django.db import transaction
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Product, Equipment, Cart, CartItem, Order, OrderProduct, OrderEquipment
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, F
@@ -79,12 +80,12 @@ def add_equipment_to_cart(request, equipment_id):
 
 
 @login_required()
-def remove_product_from_cart(request, product_id):
-    product = Product.objects.get(pk=product_id)
+def remove_item_from_cart(request, item_id, model, quantity_field):
+    item = get_object_or_404(model, pk=item_id)
     cart = Cart.objects.get(user=request.user)
     try:
-        cart_item = cart.cartitem_set.get(product=product)
-        if cart_item.product_quantity >= 1:
+        cart_item = cart.cartitem_set.get(**{f"{model.__name__.lower()}": item})
+        if getattr(cart_item, quantity_field) >= 1:
             cart_item.delete()
     except CartItem.DoesNotExist:
         pass
@@ -93,17 +94,13 @@ def remove_product_from_cart(request, product_id):
 
 
 @login_required()
-def remove_equipment_from_cart(request, equipment_id):
-    equipment = Equipment.objects.get(pk=equipment_id)
-    cart = Cart.objects.get(user=request.user)
-    try:
-        cart_item = cart.cartitem_set.get(equipment=equipment)
-        if cart_item.equipment_quantity >= 1:
-            cart_item.delete()
-    except CartItem.DoesNotExist:
-        pass
+def remove_product_from_cart(request, product_id):
+    return remove_item_from_cart(request, product_id, Product, 'product_quantity')
 
-    return redirect('cart')
+
+@login_required()
+def remove_equipment_from_cart(request, equipment_id):
+    return remove_item_from_cart(request, equipment_id, Equipment, 'equipment_quantity')
 
 
 @login_required()
@@ -132,9 +129,13 @@ def update_quantity(request, cart_item_id, action, item_type):
 
         cart_item.save()
 
-        total_amount = CartItem.objects.aggregate(
-            total=Sum(F(f'{item_type}__price') * F(quantity_attr))
-        )['total'] or 0
+        product_total = CartItem.objects.filter(product__isnull=False).aggregate(
+            total=Sum(F('product__price') * F('product_quantity')))['total'] or 0
+
+        equipment_total = CartItem.objects.filter(equipment__isnull=False).aggregate(
+            total=Sum(F('equipment__price') * F('equipment_quantity')))['total'] or 0
+
+        total_amount = round(product_total + equipment_total, 2)
 
         return JsonResponse(
             {'success': True, 'quantity': getattr(cart_item, quantity_attr), 'totalAmount': total_amount})
@@ -143,8 +144,7 @@ def update_quantity(request, cart_item_id, action, item_type):
         return JsonResponse({'error': 'Cart item not found'})
 
 
-@login_required()
-def view_cart(request):
+def calculate_total_amount(request):
     cart = request.user.cart
     cart_items = CartItem.objects.filter(cart=cart)
 
@@ -154,6 +154,29 @@ def view_cart(request):
     equipment_total = cart_items.filter(equipment__isnull=False).aggregate(
         total=Sum(F('equipment__price') * F('equipment_quantity')))['total'] or 0
 
-    total_amount = round(product_total + equipment_total, 2)
+    return cart_items, round(product_total + equipment_total, 2)
+
+
+@login_required()
+def view_cart(request):
+    cart_items, total_amount = calculate_total_amount(request)
 
     return render(request, 'base/cart.html', {'cart_items': cart_items, 'total_amount': total_amount})
+
+
+@login_required
+@transaction.atomic
+def checkout(request):
+    cart_items, total_amount = calculate_total_amount(request)
+
+    order = Order.objects.create(user=request.user)
+    order_products = []
+
+    for cart_item in cart_items:
+        if cart_item.product:
+            order_product = OrderProduct.objects.create(order=order, cart_item=cart_item)
+            order_products.append(order_product)
+        elif cart_item.equipment:
+            OrderEquipment.objects.create(order=order, cart_item=cart_item)
+
+    return render(request, 'base/checkout.html', {'order': order, 'order_product': order_products, 'total_amount': total_amount})
