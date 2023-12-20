@@ -1,0 +1,14 @@
+{% block content %}
+    {% for order_info in order_data %}
+    <h3>{{ order_info.order }}</h3>
+    <ul>
+        {% for product in order_info.order_products %}
+            <li>{{ product.cart_item.product.name }} - Quantity: {{ product.cart_item.product_quantity }}</li>
+        {% endfor %}
+        {% for equipment in order_info.order_equipments %}
+            <li>{{ equipment.cart_item.equipment.name }} - Quantity: {{ equipment.cart_item.equipment_quantity }}</li>
+        {% endfor %}
+    </ul>
+    <p>Total Amount: ${{ order_info.total_amount }}</p>
+    {% endfor %}
+{% endblock %}

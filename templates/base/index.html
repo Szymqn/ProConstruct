@@ -21,6 +21,9 @@
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                 <a class="dropdown-item" href="{% url 'cart' %}">Koszyk</a>
                 <a class="dropdown-item" href="{% url 'user_details' %}">Twoje konto</a>
+                {% if request.user.is_staff %}
+                    <a class="dropdown-item" href="{% url 'orders_manage' %}">Zarządzaj zamówieniami</a>
+                {% endif %}
                 <a class="dropdown-item" href="{% url 'logout' %}">Wyloguj się</a>
             </div>
         </div>
