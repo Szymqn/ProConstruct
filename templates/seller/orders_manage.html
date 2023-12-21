@@ -11,5 +11,10 @@
         {% endfor %}
     </ul>
     <p>Total Amount: ${{ order_info.total_amount }}</p>
+    <form method="post" action="{% url 'orders_manage' %}">
+        {% csrf_token %}
+        <input type="hidden" name="order_id_to_delete" value="{{ order_info.order.id }}">
+        <input type="submit" value="Delete order">
+    </form>
     {% endfor %}
 {% endblock %}

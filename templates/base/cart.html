@@ -54,12 +54,7 @@
     <div class="cart-total">
         <p>Łącznie: $<span id="total-amount">{{ total_amount }}</span></p>
     </div>
-    Continue Shopping
-    <a class="continue-shopping-link" href="{% url 'product-list' %}">Products</a>
-    <a class="continue-shopping-link" href="{% url 'equipment-list' %}">Equipments</a>
-    <a class="home" href="{% url 'home' %}">Home</a>
-
-    <a class="checkout-button" href="{% url 'checkout' %}">Checkout</a>
+    <a class="checkout-button" href="{% url 'checkout' %}">Zamów</a>
 </div>
 {% endblock %}
 

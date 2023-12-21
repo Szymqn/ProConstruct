@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import user_passes_test, login_required
 from base.models import Order, OrderProduct, OrderEquipment
 
@@ -6,6 +6,16 @@ from base.models import Order, OrderProduct, OrderEquipment
 @login_required()
 @user_passes_test(lambda u: u.is_staff)
 def orders_manage(request):
+    if request.method == 'POST':
+        order_id = request.POST.get('order_id_to_delete')
+        if order_id:
+            try:
+                order_to_delete = Order.objects.get(pk=order_id)
+                order_to_delete.delete()
+                return redirect('orders_manage')
+            except Order.DoesNotExist:
+                pass
+
     orders = Order.objects.all()
 
     order_data = []
