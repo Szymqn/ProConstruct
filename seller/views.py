@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import user_passes_test, login_required
+from django.http import HttpResponseBadRequest
 from base.models import Order, OrderProduct, OrderEquipment
+from datetime import datetime, time
 
 
 @login_required()
@@ -15,6 +17,29 @@ def orders_manage(request):
                 return redirect('orders_manage')
             except Order.DoesNotExist:
                 pass
+
+        order_id_to_update = request.POST.get('order_id_to_update')
+        order_completion_date = request.POST.get('order_completion_date')
+
+        if order_id_to_update and order_completion_date:
+            try:
+                order_to_update = Order.objects.get(pk=order_id_to_update)
+
+                order_completion_date = datetime.strptime(order_completion_date, '%Y-%m-%d').date()
+
+                default_time = time(12, 0, 0)
+                order_completion_datetime = datetime.combine(
+                    order_completion_date,
+                    default_time
+                )
+
+                order_to_update.order_completion_date = order_completion_datetime
+                order_to_update.save()
+                return redirect('orders_manage')
+            except Order.DoesNotExist:
+                pass
+
+        return HttpResponseBadRequest("Invalid form submission")
 
     orders = Order.objects.all()
 
