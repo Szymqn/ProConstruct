@@ -44,6 +44,7 @@ class Cart(models.Model):
 class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     order_date = models.DateTimeField(auto_now_add=True)
+    order_completion_date = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"Order #{self.id} for {self.user.username}"
