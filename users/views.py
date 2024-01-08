@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login, logout, update_session_auth
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from .forms import CustomUserCreationForm, LoginForm
+from base.models import Order, OrderProduct, OrderEquipment
 
 
 def user_signup(request):
@@ -52,3 +53,31 @@ def change_password(request):
     else:
         form = PasswordChangeForm(user=request.user)
     return render(request, 'users/password_change.html', {'form': form})
+
+
+@login_required
+def check_orders(request):
+    orders = Order.objects.filter(user=request.user)
+
+    order_data = []
+
+    for order in orders:
+        order_products = OrderProduct.objects.filter(order=order)
+        order_equipments = OrderEquipment.objects.filter(order=order)
+
+        total_amount_products = sum(
+            product.cart_item.product.price * product.cart_item.product_quantity for product in order_products)
+        total_amount_equipments = sum(
+            equipment.cart_item.equipment.price * equipment.cart_item.equipment_quantity for equipment in
+            order_equipments)
+
+        total_amount = total_amount_products + total_amount_equipments
+
+        order_data.append({
+            'order': order,
+            'order_products': order_products,
+            'order_equipments': order_equipments,
+            'total_amount': total_amount
+        })
+
+    return render(request, 'users/check_orders.html', {'order_data': order_data})
