@@ -1,6 +1,13 @@
 {% include 'base/navbar.html' %}
 {% block content %}
 <section style="width:fit-content;margin-left: auto;margin-right: auto;margin-top:3rem">
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
 <h3>Lista narzędzi</h3>
 </section>
 <div class="con" style="margin-top: 4rem; width: fit-content; margin-left: 3rem; margin-right: 3rem; ">
