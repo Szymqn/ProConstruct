@@ -1,3 +1,5 @@
+{% include 'base/navbar.html' %}
+{% block content %}
 <h1>Signup</h1>
 <form method="POST">
     {% csrf_token %}
@@ -5,3 +7,4 @@
     <button type="submit">Signup</button>
     <a href="{% url 'login' %}">Already have an account?</a>
 </form>
+{% endblock %}

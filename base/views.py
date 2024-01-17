@@ -8,7 +8,7 @@ from django.http import JsonResponse
 
 
 def index(request):
-    return render(request, 'base/homepage.html')
+    return render(request, 'base/navbar.html')
 
 
 def product_list(request):
