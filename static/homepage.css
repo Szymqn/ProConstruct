@@ -1,0 +1,22 @@
+.landingPicBox{
+    width:100%;
+    overflow-x:clip;
+    background-image: url("landing_pic.jpg");
+    height: 100%;
+    display:flex;
+    flex-flow: column;
+    flex-grow: 1;
+}
+.mainPageBox{
+    background-color: white;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 1rem;
+    border-radius: 15px;
+    margin-top: 2rem;
+    text-align: center;
+}
+.mainPageBox h1{
+    padding-left:10rem;
+    padding-right: 10rem;
+}

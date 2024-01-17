@@ -1,0 +1,23 @@
+{% load static %}
+{% include 'base/navbar.html' %}
+<link rel="stylesheet" href="{% static "homepage.css" %}"/>
+
+<main class="landingPicBox">
+        <article class="mainPageBox">
+            <h1>Witaj na ProConstruct</h1><br>
+            U nas znajdziesz wszystko co potrzebne dla twojej budowy, nieważne czy będą to materiały <br>
+            czy sprzęt. Aby przeglądać nasz asortyment, wybierz opcję w górnym pasku lub kliknij jeden <br>
+            z przycisków poniżej (do złożenia zamówienia wymagane jest konto klienta)
+            <br>
+            <br>
+            <a class="btn btn-primary" href="{% url 'product-list' %}">Materiały budowlane</a>
+            <a class="btn btn-primary" href="{% url 'equipment-list' %}">Narzędzia</a>
+            <br>
+            <br>
+            Mamy pewność, że nasz bogaty asortyment zapewni wszystko, czego będziesz potrzebował.
+
+        </article>
+</main>
+
+
+
