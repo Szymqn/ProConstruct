@@ -1,7 +1,7 @@
 {% include 'base/navbar.html' %}
 {% block content %}
     {% for order_info in order_data %}
-    <h3>{{ order_info.order }}</h3>
+    <p>{{ order_info.order }}</p>    
     <ul>
         {% for product in order_info.order_products %}
             <li>{{ product.cart_item.product.name }} - Quantity: {{ product.cart_item.product_quantity }}</li>
@@ -13,20 +13,5 @@
     <p>Total Amount: ${{ order_info.total_amount }}</p>
     <p>Order Date: {{ order_info.order.order_date }}</p>
     <p>Order Completion Date: {{ order_info.order.order_completion_date }}</p>
-
-    <form method="post" action="{% url 'orders_manage' %}">
-        {% csrf_token %}
-        <input type="hidden" name="order_id_to_update" value="{{ order_info.order.id }}">
-        <label>
-            <input type="date" name="order_completion_date" value="{{ order_info.order.order_completion_date|default:"" }}">
-        </label>
-        <input type="submit" value="Update order completion date">
-    </form>
-
-    <form method="post" action="{% url 'orders_manage' %}">
-        {% csrf_token %}
-        <input type="hidden" name="order_id_to_delete" value="{{ order_info.order.id }}">
-        <input type="submit" value="Delete order">
-    </form>
     {% endfor %}
 {% endblock %}

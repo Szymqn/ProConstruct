@@ -26,11 +26,11 @@ def add_product_to_cart(request, product_id):
     try:
         product = Product.objects.get(pk=product_id)
     except Product.DoesNotExist:
-        messages.error(request, "Product does not exist")
+        messages.error(request, "Produkt nie istnieje")
         return redirect('product-list')
 
     if product.quantity == 0:
-        messages.error(request, "This product is out of stock")
+        messages.error(request, "Brak produktu na stanie")
         return redirect('product-list')
 
     cart, created = Cart.objects.get_or_create(user=request.user)
@@ -42,7 +42,7 @@ def add_product_to_cart(request, product_id):
             cart_item.save()
             product.quantity -= 1
         else:
-            messages.error(request, "Cannot add more of this product to the cart")
+            messages.error(request, "Nie można dodać więcej tego produktu do koszyka")
     else:
         if cart_item.product_quantity < product.quantity:
             product.quantity -= 1
@@ -55,11 +55,11 @@ def add_equipment_to_cart(request, equipment_id):
     try:
         equipment = Equipment.objects.get(pk=equipment_id)
     except Equipment.DoesNotExist:
-        messages.error(request, "Equipment does not exist")
+        messages.error(request, "Narzędzie nie istnieje")
         return redirect('equipment-list')
 
     if equipment.quantity == 0:
-        messages.error(request, "This equipment is out of stock")
+        messages.error(request, "Brak narzędzia na stanie")
         return redirect('equipment-list')
 
     cart, created = Cart.objects.get_or_create(user=request.user)
@@ -71,7 +71,7 @@ def add_equipment_to_cart(request, equipment_id):
             cart_item.save()
             equipment.quantity -= 1
         else:
-            messages.error(request, "Cannot add more of this equipment to the cart")
+            messages.error(request, "Nie można dodać więcej tego narzędzia do koszyka")
     else:
         if cart_item.equipment_quantity < equipment.quantity:
             equipment.quantity -= 1
@@ -177,8 +177,16 @@ def checkout(request):
         if cart_item.product:
             order_product = OrderProduct.objects.create(order=order, cart_item=cart_item)
             order_products.append([order_product.cart_item.product.name, cart_item.product_quantity])
+
+            product = cart_item.product
+            product.quantity -= cart_item.product_quantity
+            product.save()
         elif cart_item.equipment:
             order_equipment = OrderEquipment.objects.create(order=order, cart_item=cart_item)
             order_equipments.append([order_equipment.cart_item.equipment.name, cart_item.equipment_quantity])
+
+            equipment = cart_item.equipment
+            equipment.quantity -= cart_item.equipment_quantity
+            equipment.save()
 
     return render(request, 'base/checkout.html', {'order': order, 'order_products': order_products, 'order_equipments': order_equipments, 'total_amount': total_amount})
