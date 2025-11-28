@@ -1,10 +1,38 @@
-{% include 'base/navbar.html' %}
-{% block content %}
-<h1>Signup</h1>
-<form method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Signup</button>
-    <a href="{% url 'login' %}">Already have an account?</a>
-</form>
-{% endblock %}
+{% load static %}
+<html lang="en">
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'auth.css' %}">
+    <title>Register</title>
+</head>
+<body>
+    <div class="container">
+        <div class="auth-card register-card">
+            <h2>Register</h2>
+            <form method="post" action="{% url 'signup' %}">
+                {% csrf_token %}
+                {% if messages %}
+                <div class="alert" role="alert">
+                    {% for message in messages %}
+                    {{ message }}
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="text" class="form-control" name="email" id="email" placeholder="Enter email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control" name="password" id="password" placeholder="Enter password" required>
+                </div>
+
+                <button type="submit" class="btn">Register</button>
+            </form>
+            <div class="auth-link">
+                <a href="{% url 'login' %}">Already have an account? Login Here</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

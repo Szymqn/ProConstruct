@@ -1,9 +1,47 @@
-{% include 'base/navbar.html' %}
-{% block content %}
-<h1>Login</h1>
-<form method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Login</button>
-</form>
-{% endblock %}
+{% load socialaccount %}
+{% load static %}
+<html lang="en">
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'auth.css' %}">
+    <title>Login</title>
+</head>
+<body>
+    <div class="container">
+        <div class="auth-card login-card">
+            <h2>Login</h2>
+            <form method="post" action="{% url 'login' %}">
+                {% csrf_token %}
+
+                {% if messages %}
+                <div class="alert" role="alert">
+                    {% for message in messages %}
+                    {{ message }}
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" class="form-control" name="username" id="username" placeholder="Enter username" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" name="password" class="form-control" id="password" placeholder="Enter password" required>
+                </div>
+
+                <button type="submit" class="btn">Login</button>
+            </form>
+
+            <form method="post" action="{% provider_login_url 'github' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-github">Login with GitHub</button>
+            </form>
+
+            <div class="auth-link">
+                <a href="{% url 'signup' %}">Don't have an account? Register</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
