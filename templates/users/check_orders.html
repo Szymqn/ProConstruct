@@ -1,17 +1,36 @@
 {% include 'base/navbar.html' %}
-{% block content %}
-    {% for order_info in order_data %}
-    <p>{{ order_info.order }}</p>    
-    <ul>
-        {% for product in order_info.order_products %}
-            <li>{{ product.cart_item.product.name }} - Quantity: {{ product.cart_item.product_quantity }}</li>
-        {% endfor %}
-        {% for equipment in order_info.order_equipments %}
-            <li>{{ equipment.cart_item.equipment.name }} - Quantity: {{ equipment.cart_item.equipment_quantity }}</li>
-        {% endfor %}
-    </ul>
-    <p>Total Amount: ${{ order_info.total_amount }}</p>
-    <p>Order Date: {{ order_info.order.order_date }}</p>
-    <p>Order Completion Date: {{ order_info.order.order_completion_date }}</p>
-    {% endfor %}
+{% load static %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'orders.css' %}">
 {% endblock %}
+
+<div class="container">
+    <h1>My Orders</h1>
+    {% for order_info in order_data %}
+    <div class="order-card">
+        <div class="order-card-header">
+            <h2>{{ order_info.order }}</h2>
+        </div>
+        <div class="order-card-body">
+            <h4>Items:</h4>
+            <ul>
+                {% for product in order_info.order_products %}
+                    <li>{{ product.cart_item.product.name }} - <strong>Quantity:</strong> {{ product.cart_item.product_quantity }}</li>
+                {% endfor %}
+                {% for equipment in order_info.order_equipments %}
+                    <li>{{ equipment.cart_item.equipment.name }} - <strong>Quantity:</strong> {{ equipment.cart_item.equipment_quantity }}</li>
+                {% endfor %}
+            </ul>
+            <p class="total-amount">Total Amount: ${{ order_info.total_amount }}</p>
+        </div>
+        <div class="order-card-footer">
+            <p><strong>Order Date:</strong> {{ order_info.order.order_date }}</p>
+            <p><strong>Expected Completion Date:</strong> {{ order_info.order.order_completion_date }}</p>
+        </div>
+    </div>
+    {% empty %}
+        <p>You have no orders yet.</p>
+    {% endfor %}
+</div>
+{#{% endblock %}#}

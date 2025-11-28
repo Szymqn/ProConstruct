@@ -1,32 +1,52 @@
 {% include 'base/navbar.html' %}
+{% load static %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'orders.css' %}">
+{% endblock %}
+
 {% block content %}
+<div class="container">
+    <h1>Manage Orders</h1>
     {% for order_info in order_data %}
-    <h3>{{ order_info.order }}</h3>
-    <ul>
-        {% for product in order_info.order_products %}
-            <li>{{ product.cart_item.product.name }} - Quantity: {{ product.cart_item.product_quantity }}</li>
-        {% endfor %}
-        {% for equipment in order_info.order_equipments %}
-            <li>{{ equipment.cart_item.equipment.name }} - Quantity: {{ equipment.cart_item.equipment_quantity }}</li>
-        {% endfor %}
-    </ul>
-    <p>Total Amount: ${{ order_info.total_amount }}</p>
-    <p>Order Date: {{ order_info.order.order_date }}</p>
-    <p>Order Completion Date: {{ order_info.order.order_completion_date }}</p>
+    <div class="order-card">
+        <div class="order-card-header">
+            <h2>{{ order_info.order }}</h2>
+        </div>
+        <div class="order-card-body">
+            <h4>Items:</h4>
+            <ul>
+                {% for product in order_info.order_products %}
+                    <li>{{ product.cart_item.product.name }} - <strong>Quantity:</strong> {{ product.cart_item.product_quantity }}</li>
+                {% endfor %}
+                {% for equipment in order_info.order_equipments %}
+                    <li>{{ equipment.cart_item.equipment.name }} - <strong>Quantity:</strong> {{ equipment.cart_item.equipment_quantity }}</li>
+                {% endfor %}
+            </ul>
+            <p class="total-amount">Total Amount: ${{ order_info.total_amount }}</p>
+        </div>
+        <div class="order-card-footer">
+            <p><strong>Order Date:</strong> {{ order_info.order.order_date|date:"Y-m-d" }}</p>
+            <p><strong>Current Completion Date:</strong> {{ order_info.order.order_completion_date|date:"Y-m-d"|default:"Not set" }}</p>
 
-    <form method="post" action="{% url 'orders_manage' %}">
-        {% csrf_token %}
-        <input type="hidden" name="order_id_to_update" value="{{ order_info.order.id }}">
-        <label>
-            <input type="date" name="order_completion_date" value="{{ order_info.order.order_completion_date|default:"" }}">
-        </label>
-        <input type="submit" value="Update order completion date">
-    </form>
-
-    <form method="post" action="{% url 'orders_manage' %}">
-        {% csrf_token %}
-        <input type="hidden" name="order_id_to_delete" value="{{ order_info.order.id }}">
-        <input type="submit" value="Delete order">
-    </form>
+            <div class="d-flex justify-content-between align-items-end mt-3">
+                <form method="post" action="{% url 'orders_manage' %}" class="form-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="order_id_to_update" value="{{ order_info.order.id }}">
+                    <div class="form-group mr-2">
+                        <label for="completion_date_{{ order_info.order.id }}" class="sr-only">Completion Date</label>
+                        <input type="date" class="form-control" name="order_completion_date" id="completion_date_{{ order_info.order.id }}" value="{{ order_info.order.order_completion_date|date:"Y-m-d" }}">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">Update Date</button>
+                </form>
+                <form method="post" action="{% url 'orders_manage' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="order_id_to_delete" value="{{ order_info.order.id }}">
+                    <button type="submit" class="btn btn-danger btn-sm">Delete Order</button>
+                </form>
+            </div>
+        </div>
+    </div>
     {% endfor %}
+</div>
 {% endblock %}

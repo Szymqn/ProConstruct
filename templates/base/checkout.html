@@ -1,21 +1,40 @@
 {% include 'base/navbar.html' %}
+{% load static %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'orders.css' %}">
+{% endblock %}
+
 {% block content %}
-    Order summary
-    <p>Order #{{ order.id }} for {{ order.user.username }}</p>
+<div class="container">
+    <h1>Order Summary</h1>
+    <div class="order-card">
+        <div class="order-card-header">
+            <h2>Order #{{ order.id }}</h2>
+        </div>
+        <div class="order-card-body">
+            {% if order_products %}
+                <h4>Products:</h4>
+                <ul>
+                    {% for name, quantity in order_products %}
+                        <li>{{ name }} - <strong>Quantity:</strong> {{ quantity }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
 
-    Products:
-    <ul>
-        {% for name, quantity in order_products %}
-            <li>Item: {{ name }}, Quantity: {{ quantity }}</li>
-        {% endfor %}
-    </ul>
-
-    Equipments:
-    <ul>
-        {% for name, quantity in order_equipments %}
-            <li>Item: {{ name }}, Quantity: {{ quantity }}</li>
-        {% endfor %}
-    </ul>
-
-    <p>Total Amount: {{ total_amount }}</p>
+            {% if order_equipments %}
+                <h4>Equipment:</h4>
+                <ul>
+                    {% for name, quantity in order_equipments %}
+                        <li>{{ name }} - <strong>Quantity:</strong> {{ quantity }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            <p class="total-amount">Total Amount: ${{ total_amount }}</p>
+        </div>
+        <div class="order-card-footer">
+            <p>Thank you for your order, {{ order.user.username }}!</p>
+        </div>
+    </div>
+</div>
 {% endblock %}
