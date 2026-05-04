@@ -1,0 +1,42 @@
+{% include 'base/navbar.html' %}
+{% block content %}
+
+<section style="width:fit-content;;margin-right: auto;margin-top:1rem; margin-left:1rem">
+    <button class="btn btn-primary" onclick="window.history.back();">Back</button>
+</section>
+
+<section style="width:fit-content;margin-left: auto;margin-right: auto;margin-top:1rem">
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+<h1 class="card-title">{{product.name}}</h1>
+</section>
+
+
+<div class="container-lg"></div>
+<div class="row" style="margin-top: 6rem;">
+    <div class="col-sm-6">
+        <img src="{{product.image}}" style="margin-left:10rem; width:48rem" alt="{{ product.name }}">
+    </div>
+    
+    <div class="col-sm-6">
+        <h5>O Produkcie: </h5>
+        <p class="card-text">{{ product.description }}</p>
+        <hr>
+        <br>
+        <p class="card-text">Ilość: {{ product.quantity }}</p>
+        <h3 class="card-text">Cena: {{ product.price }}</h3>
+        <form action="{% url 'add-product-to-cart' product.id %}" method="post">
+            {% csrf_token %}
+            <button class="btn btn-primary">Dodaj do koszyka</button>
+        </form>
+    </div>
+
+</div>
+
+
+{% endblock %}

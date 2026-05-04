@@ -15,10 +15,17 @@ def product_list(request):
     products = Product.objects.all()
     return render(request, 'base/product_list.html', {'products': products})
 
+def product_details(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    return render(request, 'base/product_details.html', {'product': product})
 
 def equipment_list(request):
     equipments = Equipment.objects.all()
     return render(request, 'base/equipment_list.html', {'equipments': equipments})
+
+def equipment_details(request, equipment_id):
+    equipment = get_object_or_404(Equipment, id=equipment_id)
+    return render(request, 'base/equipment_details.html', {'equipment': equipment})
 
 
 @login_required()

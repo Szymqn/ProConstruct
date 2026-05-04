@@ -14,7 +14,9 @@
 {% for equipment in equipments %}
 <div style="display: block; float: left; margin-right: 1rem; margin-bottom: 3rem;">
     <div class="card" style="width: 18rem; min-height: 34.463rem">
-        <img src="{{equipment.image}}" class="card-img-top" alt="{{ product.name }}">
+        <a href="{% url 'equipment-details' equipment.id %}">
+            <img src="{{equipment.image}}" class="card-img-top" alt="{{ equipment.name }}">
+        </a>
         <div class="card-body">
                 <h5 class="card-title">{{equipment.name}}</h5>
                 <p class="card-text">{{ equipment.description }}</p>
@@ -23,6 +25,7 @@
                 <form action="{% url 'add-equipment-to-cart' equipment.id %}" method="post">
                     {% csrf_token %}
                     <button class="btn btn-primary">Dodaj do koszyka</button>
+                    <a class="btn btn-primary" href="{% url 'equipment-details' equipment.id %}">Detale</a>
                 </form>
         </div>
     </div>

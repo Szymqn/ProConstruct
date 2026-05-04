@@ -14,7 +14,9 @@
 {% for product in products %}
 <div style="display: block; float: left; margin-right: 1rem; margin-bottom: 3rem;">
     <div class="card" style="width: 18rem; min-height: 34.463rem">
-        <img src="{{product.image}}" class="card-img-top" alt="{{ product.name }}">
+        <a href="{% url 'product-details' product.id %}">
+            <img src="{{product.image}}" class="card-img-top" alt="{{ product.name }}">
+        </a>
         <div class="card-body">
                 <h5 class="card-title">{{product.name}}</h5>
                 <p class="card-text">{{ product.description }}</p>
@@ -23,7 +25,9 @@
                 <form action="{% url 'add-product-to-cart' product.id %}" method="post">
                     {% csrf_token %}
                     <button class="btn btn-primary">Dodaj do koszyka</button>
+                    <a class="btn btn-primary" href="{% url 'product-details' product.id %}">Detale</a>
                 </form>
+                
         </div>
     </div>
 </div>
