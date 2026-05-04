@@ -123,6 +123,7 @@ venv/
 .env/
 env.bak/
 venv.bak/
+env/
 
 # Test
 test_input.txt
