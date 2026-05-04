@@ -8,6 +8,10 @@
 <body>
     <div class="container">
         <div class="auth-card login-card">
+            <div class="back-link-block">
+                <a class="back-link" href="/">&larr; Home</a>
+            </div>
+
             <h2>Login</h2>
             <form method="post" action="{% url 'login' %}">
                 {% csrf_token %}

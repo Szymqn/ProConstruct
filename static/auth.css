@@ -110,6 +110,22 @@ input[type="submit"]:hover, .btn:hover {
   text-decoration: none;
 }
 
+.back-link-block {
+  display: block;
+  text-align: left;
+  margin-bottom: 20px;
+  color: #007bff;
+  text-decoration: none;
+}
+
+.back-link {
+  display: block;
+  text-align: left;
+  margin-bottom: 20px;
+  color: #007bff;
+  text-decoration: none;
+}
+
 .auth-link:hover {
   text-decoration: underline;
 }
