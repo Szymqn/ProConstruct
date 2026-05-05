@@ -27,6 +27,9 @@ def equipment_details(request, equipment_id):
     equipment = get_object_or_404(Equipment, id=equipment_id)
     return render(request, 'base/equipment_details.html', {'equipment': equipment})
 
+def regulations(request):
+    return render(request, 'base/regulations.html')
+
 
 @login_required()
 def add_product_to_cart(request, product_id):

@@ -21,4 +21,6 @@ urlpatterns = [
     path('update-quantity/<int:cart_item_id>/<str:action>/<str:item_type>/', views.update_quantity, name='update-quantity'),
 
     path('checkout/', views.checkout, name='checkout'),
+
+    path('regulations/', views.regulations, name='regulations'),
 ]
