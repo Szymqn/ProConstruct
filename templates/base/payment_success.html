@@ -1,0 +1,14 @@
+{% include 'base/navbar.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container" style="text-align: center; margin-top: 3rem;">
+    <div class="alert alert-success" role="alert">
+        <h2>✓ Payment Successful!</h2>
+        <p>Your order #{{ order.id }} has been confirmed.</p>
+        <p>Total amount: ${{ order.total_amount }}</p>
+        <p>Thank you for your purchase!</p>
+        <a href="{% url 'home' %}" class="btn btn-primary" style="margin-top: 1rem;">Back to Home</a>
+    </div>
+</div>
+{% endblock %}

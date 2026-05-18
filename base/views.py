@@ -1,3 +1,6 @@
+import os
+
+from django.utils import timezone
 from django.db import transaction
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Product, Equipment, Cart, CartItem, Order, OrderProduct, OrderEquipment
@@ -5,7 +8,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, F
 from django.http import JsonResponse
-
+from .stripe_service import StripeService
 
 def index(request):
     return render(request, 'base/homepage.html')
@@ -190,15 +193,24 @@ def calculate_total_amount(request):
 def view_cart(request):
     cart_items, total_amount = calculate_total_amount(request)
 
-    return render(request, 'base/cart.html', {'cart_items': cart_items, 'total_amount': total_amount})
+    stripe_public_key = os.environ.get('STRIPE_PUBLIC_KEY', '')
 
+    return render(request, 'base/cart.html', {
+        'cart_items': cart_items,
+        'total_amount': total_amount,
+        'stripe_public_key': stripe_public_key
+    })
 
 @login_required
 @transaction.atomic
 def checkout(request):
     cart_items, total_amount = calculate_total_amount(request)
 
-    order = Order.objects.create(user=request.user)
+    order = Order.objects.create(
+        user=request.user,
+        total_amount=total_amount,
+        payment_status='pending'
+    )
     order_products = []
     order_equipments = []
 
@@ -225,3 +237,88 @@ def checkout(request):
             equipment.save()
 
     return render(request, 'base/checkout.html', {'order': order, 'order_products': order_products, 'order_equipments': order_equipments, 'total_amount': total_amount})
+
+
+@login_required()
+def initiate_payment(request, order_id):
+    """Inicjuj płatność Stripe"""
+    try:
+        order = Order.objects.get(id=order_id, user=request.user)
+    except Order.DoesNotExist:
+        messages.error(request, "Order not found")
+        return redirect('home')
+
+    stripe_service = StripeService()
+
+    success_url = request.build_absolute_uri(f'/payment-success/{order_id}/')
+    cancel_url = request.build_absolute_uri(f'/payment-cancel/{order_id}/')
+
+    result = stripe_service.create_checkout_session(
+        order_id=order.id,
+        amount=order.total_amount,
+        customer_email=order.user.email,
+        success_url=request.build_absolute_uri(f"/payment-success/{order.id}/"),
+        cancel_url=request.build_absolute_uri(f"/payment-cancel/{order.id}/"),
+    )
+
+    if result["status"] == "success":
+        order.payu_order_id = result["session_id"]
+        order.save()
+        return redirect(result["checkout_url"])
+
+    messages.error(request, result.get("message", "Payment initialization failed"))
+    return redirect("cart")
+
+
+@login_required()
+def payment_success(request, order_id):
+    try:
+        order = Order.objects.get(id=order_id, user=request.user)
+
+        # Stripe dodaje session_id w success_url
+        session_id = request.GET.get("session_id") or order.payu_order_id
+        if not session_id:
+            messages.error(request, "Brak session_id Stripe.")
+            return redirect("cart")
+
+        stripe_service = StripeService()
+        result = stripe_service.retrieve_session(session_id)
+
+        if result["status"] != "success":
+            messages.error(request, f"Stripe verify error: {result.get('message')}")
+            return redirect("cart")
+
+        session = result["session"]
+        if session.payment_status == "paid":
+            order.payment_status = "completed"
+            order.order_completion_date = timezone.now()
+            order.save()
+
+            # wyczyść koszyk użytkownika
+            try:
+                request.user.cart.cartitem_set.all().delete()
+            except Exception:
+                pass
+
+            messages.success(request, "Payment successful!")
+        else:
+            messages.warning(request, f"Payment status: {session.payment_status}")
+
+        return redirect("home")
+    except Order.DoesNotExist:
+        messages.error(request, "Order not found")
+        return redirect("home")
+
+
+@login_required()
+def payment_cancel(request, order_id):
+    """Anulowanie płatności"""
+    try:
+        order = Order.objects.get(id=order_id, user=request.user)
+        order.payment_status = 'cancelled'
+        order.save()
+        messages.warning(request, "Payment was cancelled")
+        return render(request, 'base/payment_cancel.html', {'order': order})
+    except Order.DoesNotExist:
+        messages.error(request, "Order not found")
+        return redirect('home')

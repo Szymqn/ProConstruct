@@ -3,6 +3,7 @@
 
 {% block extra_head %}
     <link rel="stylesheet" href="{% static 'orders.css' %}">
+    <script src="https://js.stripe.com/v3/"></script>
 {% endblock %}
 
 {% block content %}
@@ -30,11 +31,38 @@
                     {% endfor %}
                 </ul>
             {% endif %}
-            <p class="total-amount">Total Amount: ${{ total_amount }}</p>
+            <p class="total-amount">Total Amount: <strong>${{ total_amount }}</strong></p>
         </div>
         <div class="order-card-footer">
             <p>Thank you for your order, {{ order.user.username }}!</p>
+        <a href="{% url 'initiate-payment' order.id %}" class="btn btn-primary" style="margin-top: 1rem;">
+            Proceed to Payment (Stripe)
+        </a>
         </div>
     </div>
 </div>
+
+<script>
+    const stripe = Stripe('{{ stripe_public_key }}');
+
+    document.getElementById('checkout-button').addEventListener('click', async function() {
+        const response = await fetch('{% url "initiate-payment" order.id %}', {
+            method: 'GET'
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            const { error } = await stripe.redirectToCheckout({
+                sessionId: data.sessionId
+            });
+
+            if (error) {
+                alert('Error: ' + error.message);
+            }
+        } else {
+            alert('Error: ' + data.message);
+        }
+    });
+</script>
 {% endblock %}
