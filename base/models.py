@@ -20,6 +20,21 @@ class Equipment(models.Model):
     image = models.URLField()
     quantity = models.PositiveIntegerField(default=0)
 
+    rental_rate = models.DecimalField(
+        "Stawka najmu (za dzień)",
+        max_digits=10, decimal_places=2, default=0
+    )
+    rental_period = models.CharField(
+        "Jednostka najmu",
+        max_length=10,
+        choices=[('day', 'dzień'), ('week', 'tydzień'), ('month', 'miesiąc')],
+        default='day'
+    )
+    deposit = models.DecimalField(
+        "Kaucja",
+        max_digits=10, decimal_places=2, default=0
+    )
+
     def __str__(self):
         return self.name
 

@@ -139,11 +139,22 @@ def update_quantity(request, cart_item_id, action, item_type):
 
         cart_item.save()
 
-        product_total = CartItem.objects.filter(product__isnull=False).aggregate(
-            total=Sum(F('product__price') * F('product_quantity')))['total'] or 0
+        cart = request.user.cart
+        cart_items = CartItem.objects.filter(cart=cart)
 
-        equipment_total = CartItem.objects.filter(equipment__isnull=False).aggregate(
-            total=Sum(F('equipment__price') * F('equipment_quantity')))['total'] or 0
+        product_total = cart_items.filter(product__isnull=False).aggregate(
+            total=Sum(F('product__price') * F('product_quantity'))
+        )['total'] or 0
+
+        equipment_rental_total = cart_items.filter(equipment__isnull=False).aggregate(
+            total=Sum(F('equipment__rental_rate') * F('equipment_quantity'))
+        )['total'] or 0
+
+        equipment_deposit_total = cart_items.filter(equipment__isnull=False).aggregate(
+            total=Sum(F'equipment__deposit')
+        )['total'] or 0
+
+        equipment_total = equipment_rental_total + equipment_deposit_total
 
         total_amount = round(product_total + equipment_total, 2)
 
@@ -159,10 +170,18 @@ def calculate_total_amount(request):
     cart_items = CartItem.objects.filter(cart=cart)
 
     product_total = cart_items.filter(product__isnull=False).aggregate(
-        total=Sum(F('product__price') * F('product_quantity')))['total'] or 0
+        total=Sum(F('product__price') * F('product_quantity'))
+    )['total'] or 0
 
-    equipment_total = cart_items.filter(equipment__isnull=False).aggregate(
-        total=Sum(F('equipment__price') * F('equipment_quantity')))['total'] or 0
+    equipment_rental_total = cart_items.filter(equipment__isnull=False).aggregate(
+        total=Sum(F('equipment__rental_rate') * F('equipment_quantity'))
+    )['total'] or 0
+
+    equipment_deposit_total = cart_items.filter(equipment__isnull=False).aggregate(
+        total=Sum(F('equipment__deposit') * F('equipment_quantity'))
+    )['total'] or 0
+
+    equipment_total = equipment_rental_total + equipment_deposit_total
 
     return cart_items, round(product_total + equipment_total, 2)
 
@@ -192,7 +211,13 @@ def checkout(request):
             product.quantity -= cart_item.product_quantity
             product.save()
         elif cart_item.equipment:
-            order_equipment = OrderEquipment.objects.create(order=order, cart_item=cart_item)
+            order_equipment = OrderEquipment.objects.create(
+                order=order,
+                cart_item=cart_item,
+                rental_rate_at_order=cart_item.equipment.rental_rate,
+                deposit_at_order=cart_item.equipment.deposit,
+            )
+
             order_equipments.append([order_equipment.cart_item.equipment.name, cart_item.equipment_quantity])
 
             equipment = cart_item.equipment

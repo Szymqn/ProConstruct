@@ -33,7 +33,10 @@
                     </td>
                 {%  elif item.equipment %}
                     <td>{{ item.equipment.name }}</td>
-                    <td>{{ item.equipment.price }}</td>
+                    <td>
+                        {{ item.equipment.rental_rate }} / {{ item.equipment.get_rental_period_display }}<br>
+                        <small>Kaucja: {{ item.equipment.deposit }}</small>
+                    </td>
                     <td>
                     <button class="btn btn-danger" style="margin-left: 1rem;" onclick="updateQuantity('{{ item.id }}', 'decrement', 'equipment')">-</button>
                     <span id="equipment-quantity-{{ item.id }}">{{ item.equipment_quantity }}</span>

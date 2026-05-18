@@ -30,7 +30,9 @@
         <hr>
         <br>
         <p class="card-text">Ilość: {{ equipment.quantity }}</p>
-        <h3 class="card-text">Cena: {{ equipment.price }}</h3>
+        <p class="card-text">Stawka najmu: {{ equipment.rental_rate }} / {{ equipment.get_rental_period_display }}</p>
+        <p class="card-text">Kaucja: {{ equipment.deposit }}</p>
+        <h3 class="card-text">Cena sprzedaży: {{ equipment.price }}</h3>
         <form action="{% url 'add-equipment-to-cart' equipment.id %}" method="post">
             {% csrf_token %}
             <button class="btn btn-primary">Dodaj do koszyka</button>
