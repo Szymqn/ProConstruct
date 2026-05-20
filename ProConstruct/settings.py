@@ -28,6 +28,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 DEBUG = True
 
 ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '*'] # test DEBUG = False
 
 
 # Application definition
@@ -171,3 +172,9 @@ STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), "static")
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
+
+
+INTERNAL_IPS = [
+    "127.0.0.1",
+    "localhost",
+]

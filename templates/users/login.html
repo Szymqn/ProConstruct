@@ -4,6 +4,22 @@
 <head>
     <link rel="stylesheet" type="text/css" href="{% static 'auth.css' %}">
     <title>Login</title>
+    {% if debug %}
+    <style>
+        .debug-autologin {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 2px dashed #ff4c4c;
+            background-color: #fff0f0;
+            border-radius: 4px;
+        }
+        .debug-autologin select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+        }
+    </style>
+    {% endif %}
 </head>
 <body>
     <div class="container">
@@ -13,7 +29,19 @@
             </div>
 
             <h2>Login</h2>
-            <form method="post" action="{% url 'login' %}">
+            {# Pasek szybkiego logowania widoczny TYLKO w trybie debugowania #}
+            {% if debug %}
+            <div class="debug-autologin">
+                <label for="quick-login" style="color: #ff4c4c; font-weight: bold;">[DEBUG] Szybkie logowanie:</label>
+                <select id="quick-login" onchange="autoLogin(this)">
+                    <option value="">-- Wybierz konto --</option>
+                    <option value="admin" data-password="1234">admin (Administrator)</option>
+                    <option value="Czarek" data-password="DjangoTest2026">Czaruś (Zwykły użytkownik)</option>
+                    <option value="seller" data-password="............">test_test (Pracownik)</option>
+                </select>
+            </div>
+            {% endif %}
+            <form id="login-form" method="post" action="{% url 'login' %}">
                 {% csrf_token %}
 
                 {% if messages %}
@@ -47,5 +75,31 @@
             </div>
         </div>
     </div>
+
+    {% if debug %}
+    <script>
+        function autoLogin(selectElement) {
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            const username = selectedOption.value;
+            const password = selectedOption.getAttribute('data-password');
+
+            if (!username) return; // Jeśli wybrano pustą opcję, nic nie rób
+
+            // Ustawianie wartości w formularzu
+            document.getElementById('username').value = username;
+            document.getElementById('password').value = password;
+
+            // Automatyczne kliknięcie / wysłanie formularza
+            const form = document.getElementById('login-form');
+            const submitButton = form.querySelector('button[type="submit"]');
+            
+            if (submitButton) {
+                submitButton.click(); // To zasymuluje realne kliknięcie użytkownika
+            } else {
+                form.submit(); // Fallback, jeśli buttona nie ma
+            }
+        }
+    </script>
+    {% endif %}
 </body>
 </html>
