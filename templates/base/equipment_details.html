@@ -2,17 +2,10 @@
 {% block content %}
 
 <section style="width:fit-content;;margin-right: auto;margin-top:1rem; margin-left:1rem">
-    <button class="btn btn-primary" onclick="window.history.back();">Back</button>
+    <button class="btn btn-primary" onclick="window.history.back();">Wróć</button>
 </section>
 
 <section style="width:fit-content;margin-left: auto;margin-right: auto;margin-top:1rem">
-{% if messages %}
-<ul class="messages">
-    {% for message in messages %}
-    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-    {% endfor %}
-</ul>
-{% endif %}
 <h1 class="card-title">{{equipment.name}}</h1>
 </section>
 
@@ -35,8 +28,36 @@
         <h3 class="card-text">Cena sprzedaży: {{ equipment.price }}</h3>
         <form action="{% url 'add-equipment-to-cart' equipment.id %}" method="post">
             {% csrf_token %}
+            Wynajem 
+            od <input type="date" name="start_date" required>
+            do <input type="date" name="end_date" required>
+            <br><br>
+            
+            <!-- <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+            <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+            <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+            <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+            <input type="text" name="daterandge" value="01/01/2018 - 01/15/2018" />
+
+            <script>
+                $(function() {
+                    $('input[name="daterange"]').daterangepicker({
+                        opens: 'left'
+                    }, function(start, end, label) {
+                        console.log("A new date selection was made: " + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD'));
+                    });
+                });
+            </script> -->
+                        
             <button class="btn btn-primary">Dodaj do koszyka</button>
         </form>
+        {% if messages %}
+        <ul class="messages" style="color: red;">
+            {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
     </div>
 
 </div>

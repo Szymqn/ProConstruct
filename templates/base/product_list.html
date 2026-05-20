@@ -11,6 +11,45 @@
 <h3>Lista produktów</h3>
 </section>
 <div class="con" style="margin-top: 4rem; width: fit-content; margin-left: 3rem; margin-right: 3rem; ">
+    
+<!-- Dodatkowy styl CSS wymuszający centrowanie wewnątrz elementu IMG -->
+<style>
+    .card-img-top {
+        display: block;
+        object-fit: contain; /* Obraz zachowuje oryginalne proporcje i nie powiększa się */
+        object-position: center center; /* Centrowanie w pionie i poziomie */
+        background-color: white; /* Jasnosrebrne tło w pustych miejscach (możesz usunąć lub zmienić na #fff) */
+    }
+</style>
+
+<script>
+    function alignImagesHeight() {
+        const images = document.querySelectorAll('.card-img-top');
+        if (images.length === 0) return;
+
+        // Resetowanie wysokości przed obliczeniami
+        images.forEach(img => img.style.height = 'auto');
+
+        let maxHeight = 0;
+
+        // Szukanie najwyższego zdjęcia w jego naturalnym rozmiarze
+        images.forEach(img => {
+            if (img.offsetHeight > maxHeight) {
+                maxHeight = img.offsetHeight;
+            }
+        });
+
+        // Nadanie nowej wysokości. Obraz wyśrodkuje się w pionie dzięki "object-position"
+        images.forEach(img => {
+            img.style.height = maxHeight + 'px';
+        });
+    }
+
+    // Wywołanie po załadowaniu i przy zmianie okna
+    window.addEventListener('load', alignImagesHeight);
+    window.addEventListener('resize', alignImagesHeight);
+</script>
+
 {% for product in products %}
 <div style="display: block; float: left; margin-right: 1rem; margin-bottom: 3rem;">
     <div class="card" style="width: 18rem; min-height: 34.463rem">
@@ -24,7 +63,7 @@
                 <h3 class="card-text">Cena: {{ product.price }}</h3>
                 <form action="{% url 'add-product-to-cart' product.id %}" method="post">
                     {% csrf_token %}
-                    <button class="btn btn-primary">Dodaj do koszyka</button>
+                    <!-- <button class="btn btn-primary">Dodaj do koszyka</button> -->
                     <a class="btn btn-primary" href="{% url 'product-details' product.id %}">Detale</a>
                 </form>
                 

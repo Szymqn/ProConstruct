@@ -34,14 +34,22 @@
                 {%  elif item.equipment %}
                     <td>{{ item.equipment.name }}</td>
                     <td>
+                        {{ item.equipment.name }}<br>
+                        {% if item.rent_start_date and item.rent_end_date %}
+                            <small style="color: #666;">Wynajem: {{ item.rent_start_date|date:"Y-m-d" }} - {{ item.rent_end_date|date:"Y-m-d" }}</small>
+                        {% endif %}
+                    </td>
+                    <td>
                         {{ item.equipment.rental_rate }} / {{ item.equipment.get_rental_period_display }}<br>
                         <small>Kaucja: {{ item.equipment.deposit }}</small>
                     </td>
+                    {% if not item.rent_start_date or not item.rent_end_date %}
                     <td>
-                    <button class="btn btn-danger" style="margin-left: 1rem;" onclick="updateQuantity('{{ item.id }}', 'decrement', 'equipment')">-</button>
-                    <span id="equipment-quantity-{{ item.id }}">{{ item.equipment_quantity }}</span>
-                    <button class="btn btn-success" style="margin-right: 1rem;" onclick="updateQuantity('{{ item.id }}', 'increment', 'equipment')">+</button>
+                        <button class="btn btn-danger" style="margin-left: 1rem;" onclick="updateQuantity('{{ item.id }}', 'decrement', 'equipment')">-</button>
+                        <span id="equipment-quantity-{{ item.id }}">{{ item.equipment_quantity }}</span>
+                        <button class="btn btn-success" style="margin-right: 1rem;" onclick="updateQuantity('{{ item.id }}', 'increment', 'equipment')">+</button>
                     </td>
+                    {% endif %}
                     <td>
                          <form action="{% if item.equipment.id %}{% url 'remove-equipment-from-cart' item.equipment.id %}{% endif %}" method="post">
                             {% csrf_token %}

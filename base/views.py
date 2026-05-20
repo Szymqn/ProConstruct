@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, F
 from django.http import JsonResponse
 from .stripe_service import StripeService
+from datetime import datetime
 
 def index(request):
     return render(request, 'base/homepage.html')
@@ -65,6 +66,31 @@ def add_product_to_cart(request, product_id):
 
 @login_required()
 def add_equipment_to_cart(request, equipment_id):
+    if request.method != "POST":
+        return redirect('equipment-list')
+        
+    rent_start_date_str = request.POST.get('start_date')
+    rent_end_date_str = request.POST.get('end_date')
+
+    if not rent_start_date_str or not rent_end_date_str:
+        messages.error(request, "Musisz wybrać daty wynajmu.")
+        return redirect('equipment-details', equipment_id=equipment_id)
+    
+    # Konwersja tekstu na obiekty daty i sprawdzenie ich kolejności
+    try:
+        # Zakładamy format YYYY-MM-DD (standardowy dla <input type="date">)
+        rent_start_date = datetime.strptime(rent_start_date_str, "%Y-%m-%d").date()
+        rent_end_date = datetime.strptime(rent_end_date_str, "%Y-%m-%d").date()
+        
+        if rent_start_date > rent_end_date:
+            messages.error(request, "Data początkowa nie może być późniejsza niż data końcowa.")
+            return redirect('equipment-details', equipment_id=equipment_id)
+            
+    except ValueError:
+        messages.error(request, "Nieprawidłowy format daty.")
+        return redirect('equipment-details', equipment_id=equipment_id)
+    
+
     try:
         equipment = Equipment.objects.get(pk=equipment_id)
     except Equipment.DoesNotExist:
@@ -76,18 +102,25 @@ def add_equipment_to_cart(request, equipment_id):
         return redirect('equipment-list')
 
     cart, created = Cart.objects.get_or_create(user=request.user)
-    cart_item, item_created = CartItem.objects.get_or_create(cart=cart, equipment=equipment)
+    cart_item, item_created = CartItem.objects.get_or_create(
+        cart=cart, 
+        equipment=equipment,
+        rent_start_date=rent_start_date,
+        rent_end_date=rent_end_date
+    )
 
     if not item_created:
         if cart_item.equipment_quantity < equipment.quantity:
             cart_item.equipment_quantity += 1
             cart_item.save()
             equipment.quantity -= 1
+            equipment.save()
         else:
             messages.error(request, "Nie można dodać więcej tego narzędzia do koszyka")
     else:
         if cart_item.equipment_quantity < equipment.quantity:
             equipment.quantity -= 1
+            equipment.save()
 
     return redirect('equipment-list')
 
@@ -130,43 +163,33 @@ def update_quantity(request, cart_item_id, action, item_type):
             if quantity_attr == "product_quantity":
                 if getattr(cart_item, quantity_attr) < cart_item.product.quantity:
                     setattr(cart_item, quantity_attr, getattr(cart_item, quantity_attr) + 1)
+                else:
+                    return JsonResponse({'error': 'Brak wystarczającej ilości produktu na stanie'})
             elif quantity_attr == "equipment_quantity":
                 if getattr(cart_item, quantity_attr) < cart_item.equipment.quantity:
                     setattr(cart_item, quantity_attr, getattr(cart_item, quantity_attr) + 1)
-            else:
-                return JsonResponse({'error': 'Cannot add more of this item to the cart'})
+                else:
+                    return JsonResponse({'error': 'Brak wystarczającej ilości narzędzi na stanie'})
         elif action == 'decrement' and getattr(cart_item, quantity_attr) > 1:
             setattr(cart_item, quantity_attr, getattr(cart_item, quantity_attr) - 1)
         else:
-            return JsonResponse({'error': 'Invalid action'})
+            return JsonResponse({'error': 'Invalid action or limit reached'})
 
         cart_item.save()
 
-        cart = request.user.cart
-        cart_items = CartItem.objects.filter(cart=cart)
+        # Wywołujemy funkcję liczącą koszty, aby uniknąć duplikacji kodu
+        # i uwzględnić nową logikę liczenia dni dla sprzętu
+        _, total_amount = calculate_total_amount(request)
 
-        product_total = cart_items.filter(product__isnull=False).aggregate(
-            total=Sum(F('product__price') * F('product_quantity'))
-        )['total'] or 0
-
-        equipment_rental_total = cart_items.filter(equipment__isnull=False).aggregate(
-            total=Sum(F('equipment__rental_rate') * F('equipment_quantity'))
-        )['total'] or 0
-
-        equipment_deposit_total = cart_items.filter(equipment__isnull=False).aggregate(
-            total=Sum(F'equipment__deposit')
-        )['total'] or 0
-
-        equipment_total = equipment_rental_total + equipment_deposit_total
-
-        total_amount = round(product_total + equipment_total, 2)
-
-        return JsonResponse(
-            {'success': True, 'quantity': getattr(cart_item, quantity_attr), 'totalAmount': total_amount})
+        return JsonResponse({
+            'success': True, 
+            'quantity': getattr(cart_item, quantity_attr), 
+            'totalAmount': total_amount
+        })
 
     except CartItem.DoesNotExist:
         return JsonResponse({'error': 'Cart item not found'})
-
+    
 
 def calculate_total_amount(request):
     cart = request.user.cart
@@ -176,15 +199,17 @@ def calculate_total_amount(request):
         total=Sum(F('product__price') * F('product_quantity'))
     )['total'] or 0
 
-    equipment_rental_total = cart_items.filter(equipment__isnull=False).aggregate(
-        total=Sum(F('equipment__rental_rate') * F('equipment_quantity'))
-    )['total'] or 0
+    equipment_total = 0
+    # Obliczamy koszty wynajmu z uwzględnieniem dni
+    for item in cart_items.filter(equipment__isnull=False):
+        days = 1
+        if item.rent_start_date and item.rent_end_date:
+            delta = item.rent_end_date - item.rent_start_date
+            days = delta.days if delta.days > 0 else 1 # Zabezpieczenie przed ujemnymi datami / 0 dni
 
-    equipment_deposit_total = cart_items.filter(equipment__isnull=False).aggregate(
-        total=Sum(F('equipment__deposit') * F('equipment_quantity'))
-    )['total'] or 0
-
-    equipment_total = equipment_rental_total + equipment_deposit_total
+        rental_cost = item.equipment.rental_rate * item.equipment_quantity * days
+        deposit_cost = item.equipment.deposit * item.equipment_quantity
+        equipment_total += (rental_cost + deposit_cost)
 
     return cart_items, round(product_total + equipment_total, 2)
 

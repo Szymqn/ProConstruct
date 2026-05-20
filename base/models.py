@@ -45,6 +45,9 @@ class CartItem(models.Model):
     equipment = models.ForeignKey(Equipment, on_delete=models.CASCADE, null=True, blank=True)
     product_quantity = models.PositiveIntegerField(default=1)
     equipment_quantity = models.PositiveIntegerField(default=1)
+    
+    rent_start_date = models.DateField(null=True, blank=True)
+    rent_end_date = models.DateField(null=True, blank=True)
 
 
 class Cart(models.Model):

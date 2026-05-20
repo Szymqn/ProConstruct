@@ -11,6 +11,44 @@
 <h3>Lista narzędzi</h3>
 </section>
 <div class="con" style="margin-top: 4rem; width: fit-content; margin-left: 3rem; margin-right: 3rem; ">
+<!-- Styl CSS zapewniający zachowanie proporcji i centrowanie obrazu narzędzia -->
+<style>
+    .card-img-top {
+        display: block;
+        object-fit: contain; /* Zachowuje oryginalne proporcje i nie powiększa sztucznie obrazu */
+        object-position: center center; /* Centruje obrazek pionowo i poziomo w powiększonym polu */
+        background-color: #f8f9fa; /* Jasne tło maskujące puste przestrzenie */
+    }
+</style>
+
+<script>
+    function alignEquipmentImagesHeight() {
+        const images = document.querySelectorAll('.card-img-top');
+        if (images.length === 0) return;
+
+        // Reset wysokości przed obliczeniami (niezbędne przy zmianie rozmiaru okna)
+        images.forEach(img => img.style.height = 'auto');
+
+        let maxHeight = 0;
+
+        // Znajdź wysokość najwyższego zdjęcia narzędzia
+        images.forEach(img => {
+            if (img.offsetHeight > maxHeight) {
+                maxHeight = img.offsetHeight;
+            }
+        });
+
+        // Przypisz najwyższą wysokość wszystkim kontenerom zdjęć
+        images.forEach(img => {
+            img.style.height = maxHeight + 'px';
+        });
+    }
+
+    // Uruchomienie skryptu po załadowaniu drzewa DOM i obrazków
+    window.addEventListener('load', alignEquipmentImagesHeight);
+    window.addEventListener('resize', alignEquipmentImagesHeight);
+</script>
+
 {% for equipment in equipments %}
 <div style="display: block; float: left; margin-right: 1rem; margin-bottom: 3rem;">
     <div class="card" style="width: 18rem; min-height: 34.463rem">
@@ -25,7 +63,7 @@
                 <p class="card-text">Kaucja: {{ equipment.deposit }}</p>
                 <form action="{% url 'add-equipment-to-cart' equipment.id %}" method="post">
                     {% csrf_token %}
-                    <button class="btn btn-primary">Dodaj do koszyka</button>
+                    <!-- <button class="btn btn-primary">Dodaj do koszyka</button> -->
                     <a class="btn btn-primary" href="{% url 'equipment-details' equipment.id %}">Detale</a>
                 </form>
         </div>
