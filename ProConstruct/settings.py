@@ -100,6 +100,7 @@ SITE_ID = 1
 ACCOUNT_EMAIL_VERIFICATION = "none"
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "login"
+LOGIN_URL = '/user/login/'
 
 SOCIALACCOUNT_PROVIDERS = {
     'github': {
