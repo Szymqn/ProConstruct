@@ -152,7 +152,7 @@ def remove_equipment_from_cart(request, equipment_id):
 @login_required()
 def update_quantity(request, cart_item_id, action, item_type):
     try:
-        cart_item = CartItem.objects.get(pk=cart_item_id)
+        cart_item = CartItem.objects.select_related('product', 'equipment').get(pk=cart_item_id)
 
         if item_type not in ['product', 'equipment']:
             return JsonResponse({'error': 'Invalid item type'})
@@ -193,7 +193,7 @@ def update_quantity(request, cart_item_id, action, item_type):
 
 def calculate_total_amount(request):
     cart = request.user.cart
-    cart_items = CartItem.objects.filter(cart=cart)
+    cart_items = CartItem.objects.filter(cart=cart).select_related('product', 'equipment')
 
     product_total = cart_items.filter(product__isnull=False).aggregate(
         total=Sum(F('product__price') * F('product_quantity'))
