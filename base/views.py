@@ -321,7 +321,9 @@ def payment_success(request, order_id):
 
             # wyczyść koszyk użytkownika
             try:
-                request.user.cart.cartitem_set.all().delete()
+                for ci in request.user.cart.cartitem_set.all():
+                    ci.cart = None
+                    ci.save()
             except Exception:
                 pass
 
