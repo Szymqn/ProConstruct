@@ -11,7 +11,7 @@
 
 
 <div class="container-lg"></div>
-<div class="row" style="margin-top: 6rem;">
+<div class="row" style="margin-top: 6rem; padding: 1rem;">
     <div class="col-sm-1"></div>
     <div class="col-sm-5">
         <img src="{{equipment.image}}" class="img-fluid mx-auto d-block" alt="{{ equipment.name }}">
@@ -25,7 +25,7 @@
         <p class="card-text">Ilość: {{ equipment.quantity }}</p>
         <p class="card-text">Stawka najmu: {{ equipment.rental_rate }} / {{ equipment.get_rental_period_display }}</p>
         <p class="card-text">Kaucja: {{ equipment.deposit }}</p>
-        <h3 class="card-text">Cena sprzedaży: {{ equipment.price }}</h3>
+        <h3 class="card-text">Cena: {{ equipment.price }}</h3>
         <form action="{% url 'add-equipment-to-cart' equipment.id %}" method="post">
             {% csrf_token %}
             Wynajem 
@@ -33,22 +33,6 @@
             do <input type="date" name="end_date" required>
             <br><br>
             
-            <!-- <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
-            <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
-            <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-            <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
-            <input type="text" name="daterandge" value="01/01/2018 - 01/15/2018" />
-
-            <script>
-                $(function() {
-                    $('input[name="daterange"]').daterangepicker({
-                        opens: 'left'
-                    }, function(start, end, label) {
-                        console.log("A new date selection was made: " + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD'));
-                    });
-                });
-            </script> -->
-                        
             <button class="btn btn-primary">Dodaj do koszyka</button>
         </form>
         {% if messages %}
