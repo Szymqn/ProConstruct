@@ -28,6 +28,8 @@ def user_login(request):
             if user:
                 login(request, user)
                 return redirect('home')
+            else:
+                form.add_error(None, "Błędny login lub hasło.")
     else:
         form = LoginForm()
     return render(request, 'users/login.html', {'form': form})

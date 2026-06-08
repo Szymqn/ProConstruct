@@ -51,6 +51,13 @@
                     {% endfor %}
                 </div>
                 {% endif %}
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger" style="color: red; background-color: #f8d7da; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
+                    {% for error in form.non_field_errors %}
+                        <p style="margin: 0;">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
 
                 <div class="form-group">
                     <label for="username">Username</label>
